@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Eval Immo Guyane — Demande de devis</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #e8eaf0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .phone-frame {
+      width: 100%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      height: 88vh;
+      max-height: 720px;
+    }
+
+    /* Header */
+    .header {
+      background: #1a3a6c;
+      color: white;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: #2a5298;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .header-info h1 {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .header-info p {
+      font-size: 12px;
+      opacity: 0.85;
+    }
+
+    .powered-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.15);
+      padding: 4px 8px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    /* Chat area */
+    .chat {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: #f0f2f8;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .chat::-webkit-scrollbar { width: 4px; }
+    .chat::-webkit-scrollbar-track { background: transparent; }
+    .chat::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }
+
+    .bubble {
+      max-width: 82%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      position: relative;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .bubble.bot {
+      background: #fff;
+      align-self: flex-start;
+      border-top-left-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .bubble.user {
+      background: #d6e4f7;
+      align-self: flex-end;
+      border-top-right-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .bubble .time {
+      font-size: 10px;
+      color: #999;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    /* Devis block style */
+    .bubble.bot.devis {
+      background: #f0f7ff;
+      border-left: 3px solid #1a3a6c;
+      max-width: 92%;
+      font-size: 13px;
+    }
+
+    .typing {
+      display: none;
+      background: #fff;
+      align-self: flex-start;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border-top-left-radius: 2px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .typing span {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #999;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-6px); }
+    }
+
+    /* Input area */
+    .input-area {
+      background: #e8eaf0;
+      padding: 10px 12px;
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    textarea {
+      flex: 1;
+      background: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 10px 16px;
+      font-size: 14px;
+      font-family: inherit;
+      resize: none;
+      outline: none;
+      max-height: 100px;
+      overflow-y: auto;
+      line-height: 1.4;
+    }
+
+    .send-btn {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #1a3a6c;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .send-btn:hover { background: #142d56; }
+    .send-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+    .send-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: white;
+    }
+
+    /* Suggestions */
+    .suggestions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 0 6px 0;
+    }
+
+    .suggestion-chip {
+      background: #fff;
+      border: 1px solid #1a3a6c;
+      color: #1a3a6c;
+      border-radius: 14px;
+      padding: 5px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .suggestion-chip:hover {
+      background: #1a3a6c;
+      color: white;
+    }
+
+    /* Watermark */
+    .watermark {
+      text-align: center;
+      padding: 6px;
+      font-size: 11px;
+      color: #aaa;
+      background: #e8eaf0;
+      flex-shrink: 0;
+    }
+
+    .watermark a {
+      color: #1a3a6c;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Header -->
+  <div class="header">
+    <div class="avatar">⚖️</div>
+    <div class="header-info">
+      <h1>Eval Immo Guyane</h1>
+      <p>🟢 Assistant devis disponible 24h/24</p>
+    </div>
+    <div class="powered-badge">⚡ Amazonia</div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat" id="chat">
+    <div class="bubble bot">
+      Bonjour ! Je suis l'assistant d'<strong>Eval Immo Guyane</strong>, cabinet d'expertise immobilière de M. Karl RIBAL.
+
+Je suis là pour prendre en charge votre demande de devis rapidement. Quelques questions et votre dossier sera transmis à l'expert sous quelques minutes. 😊
+      <div class="time" id="init-time"></div>
+    </div>
+
+    <div class="suggestions" id="suggestions">
+      <span class="suggestion-chip" onclick="sendSuggestion(this)">Demande de devis</span>
+      <span class="suggestion-chip" onclick="sendSuggestion(this)">Expertise pour vente</span>
+      <span class="suggestion-chip" onclick="sendSuggestion(this)">Expertise pour divorce</span>
+      <span class="suggestion-chip" onclick="sendSuggestion(this)">Expertise pour succession</span>
+    </div>
+
+    <div class="typing" id="typing">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <textarea
+      id="input"
+      placeholder="Écrivez votre message..."
+      rows="1"
+      onkeydown="handleKey(event)"
+      oninput="autoResize(this)"
+    ></textarea>
+    <button class="send-btn" id="send-btn" onclick="send()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+
+  <div class="watermark">Propulsé par <a href="#">Amazonia</a> — Conseil en agents IA</div>
+</div>
+
+<script>
+  const chat = document.getElementById('chat');
+  const input = document.getElementById('input');
+  const sendBtn = document.getElementById('send-btn');
+  const typing = document.getElementById('typing');
+  const suggestions = document.getElementById('suggestions');
+
+  document.getElementById('init-time').textContent = getTime();
+
+  let messages = [];
+
+  function getTime() {
+    return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function autoResize(el) {
+    el.style.height = 'auto';
+    el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+  }
+
+  function handleKey(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      send();
+    }
+  }
+
+  function sendSuggestion(chip) {
+    input.value = chip.textContent;
+    suggestions.remove();
+    send();
+  }
+
+  function addBubble(text, role) {
+    const bubble = document.createElement('div');
+    // Detect devis block
+    const isDevis = role === 'bot' && text.includes('RÉCAPITULATIF');
+    bubble.className = `bubble ${role}${isDevis ? ' devis' : ''}`;
+    bubble.innerHTML = text.replace(/\n/g, '<br>') + `<div class="time">${getTime()}</div>`;
+    chat.insertBefore(bubble, typing);
+    chat.scrollTop = chat.scrollHeight;
+    return bubble;
+  }
+
+  async function send() {
+    const text = input.value.trim();
+    if (!text || sendBtn.disabled) return;
+
+    if (suggestions.parentNode) suggestions.remove();
+
+    input.value = '';
+    input.style.height = 'auto';
+    sendBtn.disabled = true;
+
+    addBubble(text, 'user');
+    messages.push({ role: 'user', content: text });
+
+    typing.style.display = 'flex';
+    chat.scrollTop = chat.scrollHeight;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages }),
+      });
+
+      const data = await res.json();
+      typing.style.display = 'none';
+
+      if (data.reply) {
+        addBubble(data.reply, 'bot');
+        messages.push({ role: 'assistant', content: data.reply });
+      } else {
+        addBubble("Une erreur s'est produite. Veuillez réessayer.", 'bot');
+      }
+    } catch (err) {
+      typing.style.display = 'none';
+      addBubble("Connexion impossible. Veuillez réessayer.", 'bot');
+    }
+
+    sendBtn.disabled = false;
+    input.focus();
+  }
+</script>
+</body>
+</html>

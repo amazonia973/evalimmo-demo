@@ -373,7 +373,7 @@ Je suis là pour prendre en charge votre demande de devis rapidement. Quelques q
         addBubble(data.reply, 'bot');
         messages.push({ role: 'assistant', content: data.reply });
       } else {
-        addBubble("Une erreur s'est produite. Veuillez réessayer.", 'bot');
+        addBubble("Erreur : " + (data.error || "réponse invalide"), 'bot');
       }
     } catch (err) {
       typing.style.display = 'none';

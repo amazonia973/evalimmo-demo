@@ -136,7 +136,7 @@ export default async function handler(req) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 800,
         system: SYSTEM_PROMPT,
         messages: messages,
@@ -145,7 +145,10 @@ export default async function handler(req) {
 
     if (!response.ok) {
       const error = await response.text();
-      return new Response(JSON.stringify({ error }), { status: 500 });
+      return new Response(JSON.stringify({ error, status: response.status }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
 
     const data = await response.json();

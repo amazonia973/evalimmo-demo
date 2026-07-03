@@ -86,7 +86,7 @@ Calcule la somme des tarifs unitaires pour chaque lot. Précise que M. Ribal app
 
 ## CALCUL ET PRÉSENTATION DU DEVIS
 
-Quand toutes les informations sont collectées, présente le récapitulatif dans ce format exact :
+Quand toutes les informations sont collectées, présente le récapitulatif dans ce format exact, puis demande confirmation :
 
 ---
 📋 RÉCAPITULATIF DE VOTRE DEMANDE
@@ -107,9 +107,17 @@ Quand toutes les informations sont collectées, présente le récapitulatif dans
 TOTAL ESTIMÉ : [Montant] €
 
 ⚠️ Le tarif définitif 2026 vous sera confirmé par M. Ribal.
-
-✅ Votre demande a été transmise à M. Karl RIBAL pour validation. Vous recevrez une confirmation et le devis officiel sous 48h.
 ---
+
+Ces informations sont-elles correctes ? Répondez **OUI** pour confirmer l'envoi à M. Ribal, ou indiquez ce qui doit être modifié.
+
+## APRÈS CONFIRMATION
+
+Si l'utilisateur confirme (OUI, oui, correct, c'est bon, etc.) :
+
+✅ Demande confirmée et transmise à M. Karl RIBAL. Vous serez contacté sous 48h pour validation du devis officiel. Merci ! 😊
+
+Si l'utilisateur veut modifier quelque chose : apporter la correction, afficher le récapitulatif mis à jour, et redemander confirmation.
 
 ## RÈGLES IMPORTANTES
 - Une question à la fois, toujours
@@ -125,6 +133,14 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return new Response(JSON.stringify({ error: 'ANTHROPIC_API_KEY manquante' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const { messages } = await req.json();
 
@@ -132,7 +148,7 @@ export default async function handler(req) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'x-api-key': apiKey,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
